@@ -23,4 +23,14 @@ app.use("/api/contacts", contactRoutes);
 const PORT = process.env.PORT || 5000;
 
 // Running the server
-app.listen(PORT, console.log(`Server is up and running on port: ${PORT}`));
+const server = app.listen(
+  PORT,
+  console.log(`Server is up and running on port: ${PORT}`)
+);
+
+// Handle unhandled rejections
+process.on("unhandledRejection", (err, promise) => {
+  console.log(`Error: ${err.message}`);
+  // Close server & exit process
+  server.close(() => process.exit(1));
+});
