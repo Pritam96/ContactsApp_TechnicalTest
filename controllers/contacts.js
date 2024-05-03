@@ -36,10 +36,11 @@ exports.getContact = async (req, res, next) => {
       data: contact,
     });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    // res.status(400).json({
+    //   success: false,
+    //   message: error.message,
+    // });
+    next(error);
   }
 };
 

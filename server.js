@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
+const errorHandler = require("./middleware/error");
 
 // Route files
 const authRoutes = require("./routes/auth");
@@ -21,6 +22,9 @@ app.use(express.json());
 // Mounting the routes
 app.use("/api/auth", authRoutes);
 app.use("/api/contacts", contactRoutes);
+
+// ErrorHandler Middleware (It must be declare after mounting all routes)
+app.use(errorHandler);
 
 // Fetching env variables from config/config.env
 const PORT = process.env.PORT || 5000;
