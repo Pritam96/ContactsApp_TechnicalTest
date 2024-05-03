@@ -15,6 +15,9 @@ connectDB();
 // Creating express app
 const app = express();
 
+// Body parser middleware
+app.use(express.json());
+
 // Mounting the routes
 app.use("/api/auth", authRoutes);
 app.use("/api/contacts", contactRoutes);
