@@ -13,10 +13,7 @@ exports.getContacts = async (req, res, next) => {
       data: contacts,
     });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
@@ -36,9 +33,7 @@ exports.getContact = async (req, res, next) => {
       data: contact,
     });
   } catch (error) {
-    next(
-      new ErrorResponse(`Contact not found with id of ${req.params.id}`, 404)
-    );
+    next(error);
   }
 };
 
@@ -54,9 +49,6 @@ exports.createContact = async (req, res, next) => {
       data: contact,
     });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
