@@ -1,22 +1,18 @@
 const express = require("express");
 const router = express.Router();
+const {
+  getContact,
+  getContacts,
+  createContact,
+} = require("../controllers/contacts");
 
 // Get all contacts
-router.get("/", (req, res, next) => {
-  res.status(200).json({ success: true, message: "Fetching all contacts" });
-});
+router.get("/", getContacts);
 
 // Get single contact
-router.get("/:id", (req, res, next) => {
-  res.status(200).json({
-    success: true,
-    message: `Fetch the contact with id: ${req.params.id}`,
-  });
-});
+router.get("/:id", getContact);
 
 // Create new contact
-router.post("/add", (req, res, next) => {
-  res.status(200).json({ success: true, message: "Adding a new contact" });
-});
+router.post("/add", createContact);
 
 module.exports = router;
