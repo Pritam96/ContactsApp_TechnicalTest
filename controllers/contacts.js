@@ -1,4 +1,5 @@
 const ContactModel = require("../models/Contact");
+const ErrorResponse = require("../utils/errorResponse");
 
 // @desc    Get all contacts
 // @route   GET /api/contacts
@@ -26,21 +27,18 @@ exports.getContact = async (req, res, next) => {
   try {
     const contact = await ContactModel.findById(req.params.id);
     if (!contact) {
-      return res.status(404).json({
-        success: true,
-        message: "Contact is not found.",
-      });
+      return next(
+        new ErrorResponse(`Contact not found with id of ${req.params.id}`, 404)
+      );
     }
     res.status(200).json({
       success: true,
       data: contact,
     });
   } catch (error) {
-    // res.status(400).json({
-    //   success: false,
-    //   message: error.message,
-    // });
-    next(error);
+    next(
+      new ErrorResponse(`Contact not found with id of ${req.params.id}`, 404)
+    );
   }
 };
 
