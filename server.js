@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const connectDB = require("./config/db");
 
 // Route files
 const authRoutes = require("./routes/auth");
@@ -7,6 +8,9 @@ const contactRoutes = require("./routes/contacts");
 
 // Loading env variables
 dotenv.config({ path: "./config/config.env" });
+
+// Connecting to database
+connectDB();
 
 // Creating express app
 const app = express();
