@@ -1,17 +1,23 @@
+const UserModel = require("../models/User");
+const ErrorResponse = require("../utils/errorResponse");
+const asyncHandler = require("../middleware/async");
+
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
-exports.register = (req, res, next) => {
-  res
-    .status(200)
-    .json({ success: true, message: "Redirect to the Login Page" });
-};
+exports.register = asyncHandler(async (req, res, next) => {
+  const { username, emailId, password } = req.body;
+
+  // Create user
+  const user = await UserModel.create({ username, emailId, password });
+  res.status(200).json({ success: true });
+});
 
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
-exports.login = (req, res, next) => {
+exports.login = asyncHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ success: true, message: "Redirect to the Landing Page" });
-};
+});
