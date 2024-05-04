@@ -12,7 +12,7 @@ exports.register = asyncHandler(async (req, res, next) => {
   const user = await UserModel.create({ username, emailId, password });
 
   // Create token
-  const token = user.getSignedJwtToken();
+  const token = await user.getSignedJwtToken();
 
   res.status(200).json({ success: true, token });
 });
@@ -21,7 +21,30 @@ exports.register = asyncHandler(async (req, res, next) => {
 // @route   POST /api/auth/login
 // @access  Public
 exports.login = asyncHandler(async (req, res, next) => {
-  res
-    .status(200)
-    .json({ success: true, message: "Redirect to the Landing Page" });
+  const { emailId, password } = req.body;
+
+  if (!emailId || !password) {
+    return next(
+      new ErrorResponse("Please provide an email and password.", 400)
+    );
+  }
+
+  // Check for user
+  const user = await UserModel.findOne({ emailId }).select("+password");
+
+  if (!user) {
+    return next(new ErrorResponse("Invalid Credentials.", 401));
+  }
+
+  // Check if password matches
+  const isPasswordMatch = await user.matchPassword(password);
+
+  if (!isPasswordMatch) {
+    return next(new ErrorResponse("Invalid Credentials.", 401));
+  }
+
+  // Create token
+  const token = user.getSignedJwtToken();
+
+  res.status(200).json({ success: true, token });
 });
