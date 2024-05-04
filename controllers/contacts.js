@@ -2,11 +2,22 @@ const ContactModel = require("../models/Contact");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 
-// @desc    Get all contacts
+// @desc    Get all contacts / Search contacts
 // @route   GET /api/contacts
 // @access  Private
 exports.getContacts = asyncHandler(async (req, res, next) => {
-  const contacts = await ContactModel.find();
+  const searchKeyword = req.query.search;
+  let keyword = {};
+  if (searchKeyword) {
+    keyword = {
+      $or: [
+        { name: { $regex: searchKeyword, $options: "i" } },
+        { phoneNumber: { $regex: searchKeyword, $options: "i" } },
+      ],
+    };
+  }
+
+  const contacts = await ContactModel.find(keyword).sort("name");
   res.status(200).json({
     success: true,
     count: contacts.length,
