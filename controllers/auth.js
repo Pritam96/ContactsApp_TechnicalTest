@@ -1,6 +1,8 @@
-const UserModel = require("../models/User");
+const crypto = require("crypto");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
+const sendEmail = require("../utils/sendEmail");
+const UserModel = require("../models/User");
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -11,13 +13,33 @@ exports.register = asyncHandler(async (req, res, next) => {
   // Create user
   const user = await UserModel.create({ username, emailId, password });
 
-  // Create email verification token
-  const token = await user.getEmailVerificationToken();
+  // Generate token and send to email
+  const confirmEmailToken = user.generateEmailConfirmToken();
 
-  // Save the token
-  await user.save();
+  // Create confirmation url
+  const confirmEmailURL = `${req.protocol}://${req.get(
+    "host"
+  )}/api/auth/confirmemail?token=${confirmEmailToken}`;
 
-  res.status(200).json({ success: true });
+  const message = `You are receiving this email because you need to confirm your email address. Please make a GET request to: \n\n ${confirmEmailURL}`;
+
+  user.save({ validateBeforeSave: false });
+
+  try {
+    const sendResult = await sendEmail({
+      email: user.emailId,
+      subject: "Email confirmation token",
+      message,
+    });
+    res.status(200).json({ success: true, data: "Email sent successfully" });
+  } catch (error) {
+    console.log(error);
+
+    // Remove the user if email sending fails
+    await user.remove();
+
+    return next(new ErrorResponse("Email could not be sent", 500));
+  }
 });
 
 // @desc    Login user
@@ -37,6 +59,11 @@ exports.login = asyncHandler(async (req, res, next) => {
 
   if (!user) {
     return next(new ErrorResponse("Invalid Credentials.", 401));
+  }
+
+  // Check if email confirmed
+  if (!user.isEmailConfirmed) {
+    return next(new ErrorResponse("Please confirm your email to login.", 401));
   }
 
   // Check if password matches
@@ -69,4 +96,40 @@ exports.getMe = asyncHandler(async (req, res, next) => {
   const user = await UserModel.findById(req.user.id);
 
   res.status(200).json({ success: true, data: user });
+});
+
+// @desc    Confirm email
+// @route   GET /api/auth/confirmemail
+// @access  Public
+exports.confirmEmail = asyncHandler(async (req, res, next) => {
+  const { token } = req.query;
+
+  if (!token) return next(new ErrorResponse("Invalid Token", 400));
+
+  // Generating hash
+  const confirmEmailToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  // get user by token
+  const user = await UserModel.findOne({
+    confirmEmailToken,
+    isEmailConfirmed: false,
+  });
+
+  if (!user) return next(new ErrorResponse("Invalid Token", 400));
+  if (user.confirmEmailTokenExpire < Date.now())
+    return next(new ErrorResponse("You token has expired", 401));
+
+  user.isEmailConfirmed = true;
+  user.confirmEmailToken = undefined;
+  user.confirmEmailTokenExpire = undefined;
+
+  // save
+  user.save({ validateBeforeSave: false });
+
+  res
+    .status(200)
+    .json({ success: true, data: "Email confirmation successful" });
 });

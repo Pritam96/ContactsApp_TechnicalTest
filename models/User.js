@@ -21,18 +21,18 @@ const UserSchema = mongoose.Schema(
         "Please add a valid email id",
       ],
     },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    emailVerificationToken: String,
-    emailVerificationTokenExpire: Date,
     password: {
       type: String,
       required: [true, "Please add a password"],
       minlength: 6,
       select: false,
     },
+    isEmailConfirmed: {
+      type: Boolean,
+      default: false,
+    },
+    confirmEmailToken: String,
+    confirmEmailTokenExpire: Date,
   },
   {
     timestamps: true,
@@ -62,20 +62,20 @@ UserSchema.methods.matchPassword = async function (enteredPassword) {
 };
 
 // Generate and hash token for email verification
-UserSchema.methods.getEmailVerificationToken = function () {
+UserSchema.methods.generateEmailConfirmToken = function () {
   // Generate token
-  const token = crypto.randomBytes(20).toString("hex");
+  const confirmationToken = crypto.randomBytes(20).toString("hex");
 
-  // Hash the token and set to emailVerificationToken field
-  this.emailVerificationToken = crypto
+  // Hash the token and set to confirmEmailToken field
+  this.confirmEmailToken = crypto
     .createHash("sha256")
-    .update(token)
+    .update(confirmationToken)
     .digest("hex");
 
   // Set expiration time
-  this.emailVerificationTokenExpire = Date.now() + 10 * 60 * 1000;
+  this.confirmEmailTokenExpire = Date.now() + 10 * 60 * 1000;
 
-  return token;
+  return confirmationToken;
 };
 
 module.exports = mongoose.model("User", UserSchema);
