@@ -5,14 +5,15 @@ const {
   getContacts,
   createContact,
 } = require("../controllers/contacts");
+const { protect } = require("../middleware/auth");
 
 // Get all contacts
-router.get("/", getContacts);
+router.get("/", protect, getContacts);
 
 // Get single contact
-router.get("/:id", getContact);
+router.get("/:id", protect, getContact);
 
 // Create new contact
-router.post("/add", createContact);
+router.post("/add", protect, createContact);
 
 module.exports = router;
