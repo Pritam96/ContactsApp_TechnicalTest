@@ -22,9 +22,10 @@ exports.getContacts = asyncHandler(async (req, res, next) => {
   const limit = parseInt(req.query.limit, 10) || 10;
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
-  const total = await ContactModel.countDocuments();
+  const total = await ContactModel.countDocuments({ user: req.user.id });
 
-  const contacts = await ContactModel.find(keyword)
+  const contacts = await ContactModel.find({ user: req.user.id })
+    .find(keyword)
     .sort("name")
     .skip(startIndex)
     .limit(limit);
@@ -71,7 +72,7 @@ exports.getContact = asyncHandler(async (req, res, next) => {
 // @route   POST /api/contacts
 // @access  Private
 exports.createContact = asyncHandler(async (req, res, next) => {
-  const contact = await ContactModel.create(req.body);
+  const contact = await ContactModel.create({ ...req.body, user: req.user.id });
 
   res.status(201).json({
     success: true,

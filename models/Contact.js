@@ -29,6 +29,11 @@ const ContactSchema = mongoose.Schema(
       trim: true,
       maxlength: [500, "Postal address can not be more than 500 characters"],
     },
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: true,
