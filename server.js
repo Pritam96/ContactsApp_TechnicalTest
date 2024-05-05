@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/error");
 
@@ -18,6 +19,9 @@ const app = express();
 
 // Body parser middleware
 app.use(express.json());
+
+// Cookie parser middleware
+app.use(cookieParser());
 
 // Mounting the routes
 app.use("/api/auth", authRoutes);
