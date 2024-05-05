@@ -11,10 +11,13 @@ exports.register = asyncHandler(async (req, res, next) => {
   // Create user
   const user = await UserModel.create({ username, emailId, password });
 
-  // Create token
-  const token = await user.getSignedJwtToken();
+  // Create email verification token
+  const token = await user.getEmailVerificationToken();
 
-  res.status(200).json({ success: true, token });
+  // Save the token
+  await user.save();
+
+  res.status(200).json({ success: true });
 });
 
 // @desc    Login user
